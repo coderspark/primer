@@ -1,24 +1,25 @@
 use std::time::Instant;
 
-/// Optimized for performance.
 pub fn is_prime(n: u64) -> bool {
-    // Handle edge cases.
-    if n < 2 {
-        return false; // 0 and 1 are not prime.
-    }
-    if n == 2 {
-        return true; // 2 is the only even prime number.
+    // Handle small cases directly.
+    match n {
+        0 | 1 => return false, // 0 and 1 are not prime.
+        2 | 3 => return true,  // 2 and 3 are prime.
+        _ if n % 2 == 0 || n % 3 == 0 => return false, // Eliminate multiples of 2 and 3.
+        _ => {}
     }
 
-    // Test divisors from 3 to sqrt(n), skipping even numbers.
-    let upper_limit = (n as f64).sqrt() as u64 + 1;
-    for i in (3..upper_limit).step_by(2) {
-        if n % i == 0 {
-            return false; // Found a divisor, not prime.
+    // Check divisors of the form 6k ± 1 up to √n.
+    let upper_limit = (n as f64).sqrt() as u64;
+    let mut i = 5;
+    while i <= upper_limit {
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
         }
+        i += 6; // Increment by 6 to check the next 6k ± 1 numbers.
     }
 
-    true // No divisors found, n is prime.
+    true
 }
 
 fn main() {
@@ -26,13 +27,12 @@ fn main() {
     let mut count = 0;
     let now = Instant::now();
 
-    while now.elapsed().as_millis() >= 1000 {
+    while now.elapsed().as_millis() < 1000 {
         if is_prime(num) {
-            count += 1;
+            count += 1; 
         }
         num += 2;
     }
-
     println!(
         "Calculated {count} primes in {}ms",
         now.elapsed().as_millis()
